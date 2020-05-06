@@ -5,7 +5,9 @@ namespace App\Client;
 
 
 use App\Entity\Player;
+use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
+use GuzzleHttp\Cookie\CookieJar;
 
 class WFClient
 {
@@ -25,10 +27,16 @@ class WFClient
      */
     private $client;
 
-    public function __construct(Player $player, UrlGenerator $urlGenerator)
+    /**
+     * @var EntityManagerInterface
+     */
+    private $entityManager;
+
+    public function __construct(Player $player, UrlGenerator $urlGenerator, EntityManagerInterface $entityManager)
     {
         $this->urlGenerator = $urlGenerator;
         $this->player = $player;
+        $this->entityManager = $entityManager;
         $this->login();
     }
 
@@ -37,8 +45,6 @@ class WFClient
         return $this->callGet($this->urlGenerator->getFarmUrl($this->player));
     }
 
-
-
     private function getClient(): Client
     {
         return $this->client;
@@ -46,53 +52,67 @@ class WFClient
 
     private function login()
     {
-        $client = new Client(['cookies' => true]);
+
 
         $player = $this->player;
 
-        try {
-            $res = $client->request('POST', 'https://www.wolnifarmerzy.pl/ajax/createtoken2.php?n=' . time(), [
-                'form_params' => [
-                    'server'   => $player->getServerId(),
-                    'username' => $player->getUsername(),
-                    'password' => $player->getPassword(),
-                    'ref'      => '',
-                    'retid'    => '',
-                    '_'        => '',
-                ],
+        if (!$player->canReuseToken()) {
+            try {
+                $client = new Client(['cookies' => true]);
+
+                $res = $client->request('POST', 'https://www.wolnifarmerzy.pl/ajax/createtoken2.php?n=' . time(), [
+                    'form_params' => [
+                        'server'   => $player->getServerId(),
+                        'username' => $player->getUsername(),
+                        'password' => $player->getPassword(),
+                        'ref'      => '',
+                        'retid'    => '',
+                        '_'        => '',
+                    ],
+                ]);
+
+                $responseBody = $res->getBody()->__toString();
+
+                $matches = null;
+                preg_match('^\[1,"[a-z\:]+^', $responseBody, $matches);
+                if (empty($matches)) {
+                    throw new \Exception('Wrong login credentials');
+                }
+
+                $url = substr($responseBody, 4, strlen($responseBody) - 6);
+
+                $url = str_replace('\\', '', $url);
+
+                $res = $client->request('GET', $url);
+
+                $body = $res->getBody()->__toString();
+
+                $needle = 'var rid = \'';
+                $startPos = strpos($body, $needle) + strlen($needle);
+
+                $body = substr($body, $startPos);
+
+                $length = strpos($body, '\'');
+
+                $token = substr($body, 0, $length);
+
+                if (empty($token)) {
+                    throw new \Exception('Token is invalid');
+                }
+                $player->setToken($token);
+                $player->setCookies($client->getConfig('cookies')->toArray());
+
+                $this->entityManager->flush();
+            } catch (\Exception $exception) {
+                dd($exception->getMessage());
+            }
+        }else{
+            $cookieJar = new CookieJar(false, $player->getCookies());
+
+            $client = new Client([
+                'cookies'  => $cookieJar
             ]);
 
-            $responseBody = $res->getBody()->__toString();
-
-            $matches = null;
-            preg_match('^\[1,"[a-z\:]+^', $responseBody, $matches);
-            if (empty($matches)) {
-                throw new \Exception('Wrong login credentials');
-            }
-
-            $url = substr($responseBody, 4, strlen($responseBody) - 6);
-
-            $url = str_replace('\\', '', $url);
-
-            $res = $client->request('GET', $url);
-
-            $body = $res->getBody()->__toString();
-
-            $needle   = 'var rid = \'';
-            $startPos = strpos($body, $needle) + strlen($needle);
-
-            $body = substr($body, $startPos);
-
-            $length = strpos($body, '\'');
-
-            $token = substr($body, 0, $length);
-
-            if (empty($token)) {
-                throw new \Exception('Token is invalid');
-            }
-            $player->setToken($token);
-        } catch (\Exception $exception) {
-            dd($exception->getMessage());
         }
 
         $this->client = $client;

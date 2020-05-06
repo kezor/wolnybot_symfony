@@ -32,9 +32,14 @@ class Player
     private $serverId;
 
     /**
-     * @var string
+     * @ORM\Column(type="string", length=255)
      */
     private $token;
+
+    /**
+     * @ORM\Column(type="json", nullable=true)
+     */
+    private $cookies = [];
 
     public function getId(): ?int
     {
@@ -92,5 +97,22 @@ class Player
     {
         $this->token = $token;
         return $this;
+    }
+
+    public function getCookies(): ?array
+    {
+        return $this->cookies;
+    }
+
+    public function setCookies(?array $cookies): self
+    {
+        $this->cookies = $cookies;
+
+        return $this;
+    }
+
+    public function canReuseToken()
+    {
+        return (bool)$this->getToken() && $this->getCookies();
     }
 }
