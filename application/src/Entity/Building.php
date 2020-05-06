@@ -32,6 +32,12 @@ class Building
      */
     private $type;
 
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Player")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $player;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -69,6 +75,18 @@ class Building
     public function setType(int $type): self
     {
         $this->type = $type;
+
+        return $this;
+    }
+
+    public function getPlayer(): ?Player
+    {
+        return $this->player;
+    }
+
+    public function setPlayer(?Player $player): self
+    {
+        $this->player = $player;
 
         return $this;
     }

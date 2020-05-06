@@ -3,6 +3,7 @@
 
 namespace App\Client;
 
+use App\Entity\Building;
 use App\Entity\Player;
 
 class UrlGenerator
@@ -12,9 +13,9 @@ class UrlGenerator
         return $this->getMainPart($player) . '&mode=getfarms&farm=1&position=0';
     }
 
-    public function getGardenInitUrl(Farmland $farmland)
+    public function getGardenInitUrl(Building $building, Player $player)
     {
-        return $this->getMainPart() . '&mode=gardeninit&farm=' . $farmland->farm->id . '&position=' . $farmland->position;
+        return $this->getMainPart($player) . '&mode=gardeninit&farm=' . $building->getFarm()->getFarmIndex() . '&position=' . $building->getPosition();
     }
 
     public function getGardenHarvestUrl(Farmland $farmland, Field $field)

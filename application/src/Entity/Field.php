@@ -38,9 +38,19 @@ class Field
     private $phase;
 
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="string", length=255)
      */
     private $planted;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $position;
+
+    /**
+     * @ORM\ManyToOne(targetEntity="App\Entity\Product")
+     */
+    private $product;
 
     public function getId(): ?int
     {
@@ -95,14 +105,38 @@ class Field
         return $this;
     }
 
-    public function getPlanted(): ?bool
+    public function getPlanted(): ?string
     {
         return $this->planted;
     }
 
-    public function setPlanted(bool $planted): self
+    public function setPlanted(string $planted): self
     {
         $this->planted = $planted;
+
+        return $this;
+    }
+
+    public function getPosition(): ?int
+    {
+        return $this->position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this->position = $position;
+
+        return $this;
+    }
+
+    public function getProduct(): ?Product
+    {
+        return $this->product;
+    }
+
+    public function setProduct(?Product $product): self
+    {
+        $this->product = $product;
 
         return $this;
     }
