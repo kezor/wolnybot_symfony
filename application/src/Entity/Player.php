@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -40,6 +42,22 @@ class Player
      * @ORM\Column(type="json", nullable=true)
      */
     private $cookies = [];
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Farm", mappedBy="player")
+     */
+    private $farms;
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Entity\Product", mappedBy="player")
+     */
+    private $products;
+
+    public function __construct()
+    {
+        $this->farms = new ArrayCollection();
+        $this->products = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -114,5 +132,67 @@ class Player
     public function canReuseToken()
     {
         return (bool)$this->getToken() && $this->getCookies();
+    }
+
+    /**
+     * @return Collection|Farm[]
+     */
+    public function getFarms(): Collection
+    {
+        return $this->farms;
+    }
+
+    public function addFarm(Farm $farm): self
+    {
+        if (!$this->farms->contains($farm)) {
+            $this->farms[] = $farm;
+            $farm->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeFarm(Farm $farm): self
+    {
+        if ($this->farms->contains($farm)) {
+            $this->farms->removeElement($farm);
+            // set the owning side to null (unless already changed)
+            if ($farm->getPlayer() === $this) {
+                $farm->setPlayer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Product[]
+     */
+    public function getProducts(): Collection
+    {
+        return $this->products;
+    }
+
+    public function addProduct(Product $product): self
+    {
+        if (!$this->products->contains($product)) {
+            $this->products[] = $product;
+            $product->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeProduct(Product $product): self
+    {
+        if ($this->products->contains($product)) {
+            $this->products->removeElement($product);
+            // set the owning side to null (unless already changed)
+            if ($product->getPlayer() === $this) {
+                $product->setPlayer(null);
+            }
+        }
+
+        return $this;
     }
 }
