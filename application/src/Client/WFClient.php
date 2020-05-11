@@ -46,6 +46,11 @@ class WFClient
         return $this->callGet($this->urlGenerator->getFarmUrl($this->player));
     }
 
+    public function cropFarmland(Building $farmland)
+    {
+        return $this->callGet($this->urlGenerator->getCropGardenUrl($farmland));
+    }
+
     private function getClient(): Client
     {
         return $this->client;
@@ -57,13 +62,12 @@ class WFClient
 
         if (!$player->canReuseToken()) {
             $client = $this->relogin($player);
-        }else{
+        } else {
             $cookieJar = new CookieJar(false, $player->getCookies());
 
             $client = new Client([
-                'cookies'  => $cookieJar
+                'cookies' => $cookieJar,
             ]);
-
         }
 
         $this->client = $client;
@@ -132,6 +136,7 @@ class WFClient
     public function getFarmlandFields(Building $building)
     {
         $url = $this->urlGenerator->getGardenInitUrl($building, $this->player);
+
         return $this->callGet($url);
     }
 }

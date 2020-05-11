@@ -110,7 +110,7 @@ class Field
         return $this->planted;
     }
 
-    public function setPlanted(string $planted): self
+    public function setPlanted(?string $planted): self
     {
         $this->planted = $planted;
 

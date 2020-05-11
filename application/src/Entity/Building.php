@@ -43,6 +43,12 @@ class Building
         return $this->id;
     }
 
+    public function setId(int $id): self
+    {
+        $this->id = $id;
+        return $this;
+    }
+
     public function getFarm(): ?Farm
     {
         return $this->farm;

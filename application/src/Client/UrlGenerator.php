@@ -23,9 +23,9 @@ class UrlGenerator
         return $this->getMainPart() . '&mode=garden_harvest&farm=' . $farmland->farm->id . '&position=' . $farmland->position . '&pflanze[]=' . $field->getProduct()->getPid() . '&feld[]=' . $field->index . '&felder[]=' . $field->getRelatedFields();
     }
 
-    public function getCropGardenUrl(Farmland $farmland)
+    public function getCropGardenUrl(Building $farmland)
     {
-        return $this->getMainPart() . '&mode=cropgarden&farm=' . $farmland->farm->id . '&position=' . $farmland->position;
+        return $this->getMainPart($farmland->getPlayer()) . '&mode=cropgarden&farm=' . $farmland->getFarm()->getFarmIndex() . '&position=' . $farmland->getPosition();
     }
 
     public function getGardenPlantUrl(Farmland $farmland, SingleBunchOfFields $singleBunchOfFields, Product $product)

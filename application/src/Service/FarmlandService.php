@@ -37,13 +37,11 @@ class FarmlandService
 
     public function updateField(Building $building, $fieldData)
     {
-        $field = $this->getField((int)$fieldData['teil_nr'], $building);
+        $field = $this->getField($fieldData, $building);
 
-        $field->setProduct($this->productRepository->findOneBy(['pid' => $fieldData['inhalt']]))
-            ->setOffsetX($fieldData['x'])
-            ->setOffsetY($fieldData['y'])
+        $field->setProduct($this->productRepository->findOneBy(['pid' => $fieldData['inhalt']??null]))
             ->setPhase($fieldData['phase'])
-            ->setPlanted($fieldData['gepflanzt']);
+            ->setPlanted($fieldData['gepflanzt']??'');
 //        $field->product_pid = $fieldData['inhalt'];
 //        $field->offset_x    = $fieldData['x'];
 //        $field->offset_y    = $fieldData['y'];
@@ -53,19 +51,31 @@ class FarmlandService
 //        $field->water       = (bool)$fieldData['iswater'];
     }
 
-    private function getField(int $teil_nr, Building $building): Field
+    private function getField(array $fieldData, Building $building): Field
     {
+//        dd($fieldData);
         $field = $this->fieldRepository->findOneBy([
             'building' => $building,
-            'position' => $teil_nr,
+            'position' => $fieldData['teil_nr'],
         ]);
         if ($field === null) {
             $field = new Field();
             $field->setBuilding($building)
-                ->setPosition($teil_nr);
+                ->setOffsetX($fieldData['x'])
+                ->setOffsetY($fieldData['y'])
+                ->setPosition($fieldData['teil_nr']);
             $this->entityManager->persist($field);
         }
 
         return $field;
+    }
+
+    public function clearOtherFields(array $updatedFieldIndexes, Building $building)
+    {
+        $keysToClear = array_diff(array_keys(array_fill(1, 120, 'x')), array_keys($updatedFieldIndexes));
+
+        foreach ($keysToClear as $position){
+            $this->updateField($building, ['teil_nr' => $position, 'phase' => 0, 'gepflanzt' => null]);
+        }
     }
 }

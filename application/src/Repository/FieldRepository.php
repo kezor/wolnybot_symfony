@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use App\Entity\Building;
 use App\Entity\Field;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -36,15 +37,14 @@ class FieldRepository extends ServiceEntityRepository
     }
     */
 
-    /*
-    public function findOneBySomeField($value): ?Field
+    public function findToClear(array $keysToClear, Building $building)
     {
         return $this->createQueryBuilder('f')
-            ->andWhere('f.exampleField = :val')
-            ->setParameter('val', $value)
+            ->andWhere('f.building = :building')
+            ->andWhere('f.position IN (:ids)')
+            ->setParameter('building', $building)
+            ->setParameter('ids', $keysToClear)
             ->getQuery()
-            ->getOneOrNullResult()
-        ;
+            ->getResult();
     }
-    */
 }
