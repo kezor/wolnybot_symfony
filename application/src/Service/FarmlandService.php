@@ -11,6 +11,7 @@ use App\Entity\Product;
 use App\Repository\FieldRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class FarmlandService
 {
@@ -26,24 +27,30 @@ class FarmlandService
      * @var ProductRepository
      */
     private $productRepository;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
     public function __construct(
         FieldRepository $fieldRepository,
         EntityManagerInterface $entityManager,
-        ProductRepository $productRepository
+        ProductRepository $productRepository,
+        LoggerInterface $logger
     ) {
         $this->fieldRepository = $fieldRepository;
         $this->entityManager = $entityManager;
         $this->productRepository = $productRepository;
+        $this->logger = $logger;
     }
 
     public function updateField(Building $building, $fieldData)
     {
         $field = $this->getField($fieldData, $building);
 
-        $field->setProduct($this->productRepository->findOneBy(['pid' => $fieldData['inhalt']??null]))
+        $field->setProduct($this->productRepository->findOneBy(['pid' => $fieldData['inhalt'] ?? null]))
             ->setPhase($fieldData['phase'])
-            ->setPlanted($fieldData['gepflanzt']??'');
+            ->setPlanted($fieldData['gepflanzt'] ?? '');
 //        $field->product_pid = $fieldData['inhalt'];
 //        $field->offset_x    = $fieldData['x'];
 //        $field->offset_y    = $fieldData['y'];
@@ -65,8 +72,8 @@ class FarmlandService
         if ($field === null) {
             $field = new Field();
             $field->setBuilding($building)
-                ->setOffsetX($fieldData['x']??null)
-                ->setOffsetY($fieldData['y']??null)
+                ->setOffsetX($fieldData['x'] ?? null)
+                ->setOffsetY($fieldData['y'] ?? null)
                 ->setPosition($fieldData['teil_nr']);
             $this->entityManager->persist($field);
         }
@@ -78,7 +85,7 @@ class FarmlandService
     {
         $keysToClear = array_diff(array_keys(array_fill(1, 120, 'x')), array_keys($updatedFieldIndexes));
 
-        foreach ($keysToClear as $position){
+        foreach ($keysToClear as $position) {
             $this->updateField($building, ['teil_nr' => $position, 'phase' => 0, 'gepflanzt' => null]);
         }
     }
@@ -87,11 +94,16 @@ class FarmlandService
         WFClient $client,
         ?Building $building,
         ?Product $product
-    )
-    {
+    ) {
         $emptyFields = $this->fieldRepository->findEmptyFields($building);
 
-        foreach ($emptyFields as $field){
+        if(empty($emptyFields)){
+            return false;
+        }
+
+        $this->logger->info('Found ' . count($emptyFields) . ' empty fields');
+
+        foreach ($emptyFields as $field) {
             $response = $client->seed($building, $field, $product);
         }
 

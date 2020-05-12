@@ -8,11 +8,14 @@ use App\Message\Crop;
 use App\Message\Seed;
 use App\Repository\BuildingRepository;
 use App\Repository\ProductRepository;
+use App\Repository\TaskRepository;
 use App\Service\FarmlandService;
 use App\Service\UpdateService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 final class SeedHandler implements MessageHandlerInterface
 {
@@ -47,6 +50,14 @@ final class SeedHandler implements MessageHandlerInterface
      * @var FarmlandService
      */
     private $farmlandService;
+    /**
+     * @var TaskRepository
+     */
+    private $taskRepository;
+    /**
+     * @var MessageBusInterface
+     */
+    private $bus;
 
     public function __construct(
         BuildingRepository $buildingRepository,
@@ -55,7 +66,9 @@ final class SeedHandler implements MessageHandlerInterface
         LoggerInterface $logger,
         UpdateService $updateService,
         ProductRepository $productRepository,
-        FarmlandService $farmlandService
+        FarmlandService $farmlandService,
+        TaskRepository $taskRepository,
+    MessageBusInterface $bus
     ) {
         $this->buildingRepository = $buildingRepository;
         $this->urlGenerator = $urlGenerator;
@@ -64,6 +77,8 @@ final class SeedHandler implements MessageHandlerInterface
         $this->updateService = $updateService;
         $this->productRepository = $productRepository;
         $this->farmlandService = $farmlandService;
+        $this->taskRepository = $taskRepository;
+        $this->bus = $bus;
     }
 
     public function __invoke(Seed $message)
@@ -75,7 +90,17 @@ final class SeedHandler implements MessageHandlerInterface
 
         $response = $this->farmlandService->seed($client, $building, $product);
 
-        dd($response);
+        $this->logger->info('Seeded');
+
+        if (!$response) {
+            $this->logger->info('Nothing has beed seeded - no empty fields');
+
+            return;
+        }
+        $response = json_decode($response, true);
         $this->updateService->update($response, $building->getPlayer(), $client);
+        $this->logger->info('Updated');
+
+        $this->bus->dispatch(new Crop($building), [new DelayStamp(random_int(16, 23) * 60 * 1000)]); // delay 16-23 minutes
     }
 }

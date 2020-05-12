@@ -5,11 +5,16 @@ namespace App\MessageHandler;
 use App\Client\UrlGenerator;
 use App\Client\WFClient;
 use App\Message\Crop;
+use App\Message\Seed;
 use App\Repository\BuildingRepository;
+use App\Repository\TaskRepository;
 use App\Service\UpdateService;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
+use Symfony\Component\Messenger\MessageBus;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Component\Messenger\Stamp\DelayStamp;
 
 final class CropHandler implements MessageHandlerInterface
 {
@@ -36,19 +41,31 @@ final class CropHandler implements MessageHandlerInterface
      * @var UpdateService
      */
     private $updateService;
+    /**
+     * @var TaskRepository
+     */
+    private $taskRepository;
+    /**
+     * @var MessageBus
+     */
+    private $bus;
 
     public function __construct(
         BuildingRepository $buildingRepository,
         UrlGenerator $urlGenerator,
         EntityManagerInterface $entityManager,
         LoggerInterface $logger,
-        UpdateService $updateService
+        UpdateService $updateService,
+        TaskRepository $taskRepository,
+        MessageBusInterface $bus
     ) {
         $this->buildingRepository = $buildingRepository;
         $this->urlGenerator = $urlGenerator;
         $this->entityManager = $entityManager;
         $this->logger = $logger;
         $this->updateService = $updateService;
+        $this->taskRepository = $taskRepository;
+        $this->bus = $bus;
     }
 
     public function __invoke(Crop $message)
@@ -69,7 +86,13 @@ final class CropHandler implements MessageHandlerInterface
         $response = json_decode($response, true);
         $this->logger->info('Farmland cropped - ID: ' . $building->getId());
 
-        $this->updateService->update($response['updateblock'], $building->getPlayer(), $client);
+        $this->updateService->update($response, $building->getPlayer(), $client);
         $this->logger->info('Updated');
+
+        $task = $this->taskRepository->findOneBy(['building' => $building, 'status' => 1]);
+
+        if ($task) {
+            $this->bus->dispatch(new Seed($building, $task->getProduct())); // delay 16-23 minutes
+        }
     }
 }

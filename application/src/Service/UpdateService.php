@@ -110,13 +110,21 @@ class UpdateService
                 if ($spaceData['status'] == 1) {
                     switch ($spaceData['buildingid']) {
                         case BuildingType::FARMLAND:
-//                            var_dump('Updating....');
-//                            dd($spaceData);
                             $building = $this->getBuilding($farm, $player, $spaceData);
 
-//                            $farmland->fillInFields();
+                            if (isset($spaceData['production'])) {
+                                $production = $spaceData['production'];
+                                if ((int)$production[0]['remain'] < 0) {
+                                    $this->logger->info('Building ID: ' . $building->getId() . ' ready to crop');
+                                } else {
+                                    $this->logger->info('Building ID: ' . $building->getId() . ' production in progress');
+                                }
+                            } else {
+                                $this->logger->info('Building ID: ' . $building->getId() . ' ready to seed');
+                            }
+
                             $this->updateFields($building, $client);
-//                            $farmland->push();
+                            $this->logger->info('Builing ID: ' . $building->getId() . ' updated.');
                             break;
 //                        case BuildingType::HOVEL:
 //                            $this->processHovel($spaceData, $farmId);
