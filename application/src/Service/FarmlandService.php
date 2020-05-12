@@ -4,8 +4,10 @@
 namespace App\Service;
 
 
+use App\Client\WFClient;
 use App\Entity\Building;
 use App\Entity\Field;
+use App\Entity\Product;
 use App\Repository\FieldRepository;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -57,12 +59,14 @@ class FarmlandService
         $field = $this->fieldRepository->findOneBy([
             'building' => $building,
             'position' => $fieldData['teil_nr'],
+
         ]);
+
         if ($field === null) {
             $field = new Field();
             $field->setBuilding($building)
-                ->setOffsetX($fieldData['x'])
-                ->setOffsetY($fieldData['y'])
+                ->setOffsetX($fieldData['x']??null)
+                ->setOffsetY($fieldData['y']??null)
                 ->setPosition($fieldData['teil_nr']);
             $this->entityManager->persist($field);
         }
@@ -77,5 +81,20 @@ class FarmlandService
         foreach ($keysToClear as $position){
             $this->updateField($building, ['teil_nr' => $position, 'phase' => 0, 'gepflanzt' => null]);
         }
+    }
+
+    public function seed(
+        WFClient $client,
+        ?Building $building,
+        ?Product $product
+    )
+    {
+        $emptyFields = $this->fieldRepository->findEmptyFields($building);
+
+        foreach ($emptyFields as $field){
+            $response = $client->seed($building, $field, $product);
+        }
+
+        return $response;
     }
 }

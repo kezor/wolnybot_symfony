@@ -4,7 +4,9 @@
 namespace App\Client;
 
 use App\Entity\Building;
+use App\Entity\Field;
 use App\Entity\Player;
+use App\Entity\Product;
 
 class UrlGenerator
 {
@@ -28,9 +30,14 @@ class UrlGenerator
         return $this->getMainPart($farmland->getPlayer()) . '&mode=cropgarden&farm=' . $farmland->getFarm()->getFarmIndex() . '&position=' . $farmland->getPosition();
     }
 
-    public function getGardenPlantUrl(Farmland $farmland, SingleBunchOfFields $singleBunchOfFields, Product $product)
+    public function getGardenPlantUrl(Building $farmland, Field $field, Product $product)
     {
-        return $this->getMainPart() . '&mode=garden_plant&farm=' . $farmland->farm->id . '&position=' . $farmland->position . $singleBunchOfFields->getUrlPartWithProduct($product);// '&pflanze[]=' . $product->getPid() . '&feld[]=' . $singleBunchOfFields->getIndexes() . '&felder[]=' . $singleBunchOfFields->getRelatedFields();
+        return $this->getMainPart($farmland->getPlayer()) . '&mode=garden_plant&farm=' . $farmland->getFarm()->getFarmIndex() . '&position=' . $farmland->getPosition()
+//            . $singleBunchOfFields->getUrlPartWithProduct($product);// '&pflanze[]=' . $product->getPid() . '&feld[]=' . $singleBunchOfFields->getIndexes() . '&felder[]=' . $singleBunchOfFields->getRelatedFields();
+            //&pflanze[]=17&feld[]=36&felder[]=36
+            . '&pflanze[]=' . $product->getPid()
+            . '&feld[]=' . $field->getPosition()
+            . '&felder[]=' . $field->getPosition();
     }
 
     public function getGardenWaterUrl(Farmland $farmland, Field $field)

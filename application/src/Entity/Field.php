@@ -23,22 +23,22 @@ class Field
     private $building;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $offsetX;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $offsetY;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="integer", nullable=true)
      */
     private $phase;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
     private $planted;
 
@@ -49,6 +49,7 @@ class Field
 
     /**
      * @ORM\ManyToOne(targetEntity="App\Entity\Product")
+     * @ORM\JoinColumn(nullable=true)
      */
     private $product;
 
@@ -74,7 +75,7 @@ class Field
         return $this->offsetX;
     }
 
-    public function setOffsetX(int $offsetX): self
+    public function setOffsetX(?int $offsetX): self
     {
         $this->offsetX = $offsetX;
 
@@ -86,7 +87,7 @@ class Field
         return $this->offsetY;
     }
 
-    public function setOffsetY(int $offsetY): self
+    public function setOffsetY(?int $offsetY): self
     {
         $this->offsetY = $offsetY;
 

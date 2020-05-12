@@ -47,4 +47,18 @@ class FieldRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @param Building|null $building
+     * @return int|mixed|string|Field[]
+     */
+    public function findEmptyFields(?Building $building)
+    {
+        return $this->createQueryBuilder('f')
+            ->andWhere('f.building = :building')
+            ->andWhere('f.phase = 0')
+            ->setParameter('building', $building)
+            ->getQuery()
+            ->getResult();
+    }
 }

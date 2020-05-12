@@ -5,7 +5,9 @@ namespace App\Client;
 
 
 use App\Entity\Building;
+use App\Entity\Field;
 use App\Entity\Player;
+use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
@@ -49,6 +51,11 @@ class WFClient
     public function cropFarmland(Building $farmland)
     {
         return $this->callGet($this->urlGenerator->getCropGardenUrl($farmland));
+    }
+
+    public function seed(Building $farmland, Field $field, Product $product)
+    {
+        return $this->callGet($this->urlGenerator->getGardenPlantUrl($farmland, $field, $product));
     }
 
     private function getClient(): Client

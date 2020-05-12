@@ -64,8 +64,9 @@ class UpdateService
         $this->farmlandService = $farmlandService;
     }
 
-    public function update(array $updateblock, Player $player, WFClient $client)
+    public function update(array $response, Player $player, WFClient $client)
     {
+        $updateblock = $response['updateblock'];
         $stocks = $updateblock['stock']['stock'];
         $this->updateStock($stocks, $player);
         $this->logger->info('Store updated');
@@ -110,6 +111,7 @@ class UpdateService
                     switch ($spaceData['buildingid']) {
                         case BuildingType::FARMLAND:
 //                            var_dump('Updating....');
+//                            dd($spaceData);
                             $building = $this->getBuilding($farm, $player, $spaceData);
 
 //                            $farmland->fillInFields();

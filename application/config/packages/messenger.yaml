@@ -10,6 +10,7 @@ framework:
             # sync: 'sync://'
 
         routing:
-#            App\Message\Crop: async
-#             App\Message\Update: async
+            App\Message\Seed: async
+            App\Message\Crop: async
+            App\Message\Update: async
 

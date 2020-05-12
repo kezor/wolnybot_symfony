@@ -72,4 +72,11 @@ class Product
 
         return $this;
     }
+
+    public function setId(?string $id)
+    {
+        $this->id = $id;
+
+        return $this;
+    }
 }

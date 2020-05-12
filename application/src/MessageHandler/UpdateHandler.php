@@ -105,6 +105,6 @@ final class UpdateHandler implements MessageHandlerInterface
 
         $response = json_decode($response, true);
 
-        $this->updateService->update($response['updateblock'], $player, $this->client);
+        $this->updateService->update($response, $player, $this->client);
     }
 }
