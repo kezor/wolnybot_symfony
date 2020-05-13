@@ -9,6 +9,7 @@ use App\Message\Seed;
 use App\Repository\BuildingRepository;
 use App\Repository\TaskRepository;
 use App\Service\UpdateService;
+use Doctrine\Migrations\Configuration\Exception\JsonNotValid;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Handler\MessageHandlerInterface;
@@ -83,10 +84,17 @@ final class CropHandler implements MessageHandlerInterface
             $response = $client->cropFarmland($building);
         }
 
-        $response = json_decode($response, true);
+
+
+        $responseData = json_decode($response, true);
+
+        if($responseData === null){
+            throw new JsonNotValid($response);
+        }
+
         $this->logger->info('Farmland cropped - ID: ' . $building->getId());
 
-        $this->updateService->update($response, $building->getPlayer(), $client);
+        $this->updateService->update($responseData, $building->getPlayer(), $client);
         $this->logger->info('Updated');
 
         $task = $this->taskRepository->findOneBy(['building' => $building, 'status' => 1]);
