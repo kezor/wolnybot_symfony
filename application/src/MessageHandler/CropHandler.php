@@ -84,11 +84,10 @@ final class CropHandler implements MessageHandlerInterface
             $response = $client->cropFarmland($building);
         }
 
-
-
         $responseData = json_decode($response, true);
 
         if($responseData === null){
+            $this->logger->error('JSON invalid' . $response);
             throw new JsonNotValid($response);
         }
 
