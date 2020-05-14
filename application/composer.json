@@ -17,6 +17,7 @@
         "ext-json": "*"
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^3.3",
         "symfony/maker-bundle": "^1.15"
     },
     "config": {

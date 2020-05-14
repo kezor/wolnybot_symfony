@@ -57,6 +57,7 @@ class FieldRepository extends ServiceEntityRepository
         return $this->createQueryBuilder('f')
             ->andWhere('f.building = :building')
             ->andWhere('f.phase = 0')
+            ->andWhere('f.productType IS NULL')
             ->setParameter('building', $building)
             ->getQuery()
             ->getResult();

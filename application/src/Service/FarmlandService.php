@@ -50,6 +50,7 @@ class FarmlandService
 
         $field->setProduct($this->productRepository->findOneBy(['pid' => $fieldData['inhalt'] ?? null]))
             ->setPhase($fieldData['phase'])
+            ->setProductType($fieldData['buildingid'] ?? null)
             ->setPlanted($fieldData['gepflanzt'] ?? '');
 //        $field->product_pid = $fieldData['inhalt'];
 //        $field->offset_x    = $fieldData['x'];
@@ -74,7 +75,7 @@ class FarmlandService
             $field->setBuilding($building)
                 ->setOffsetX($fieldData['x'] ?? null)
                 ->setOffsetY($fieldData['y'] ?? null)
-                ->setPosition($fieldData['teil_nr']);
+                ->setPosition((int)$fieldData['teil_nr']);
             $this->entityManager->persist($field);
         }
 

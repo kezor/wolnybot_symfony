@@ -4,6 +4,7 @@ namespace App\MessageHandler;
 
 use App\Client\UrlGenerator;
 use App\Client\WFClient;
+use App\Entity\Product;
 use App\Message\Crop;
 use App\Message\Seed;
 use App\Repository\BuildingRepository;
@@ -68,7 +69,7 @@ final class SeedHandler implements MessageHandlerInterface
         ProductRepository $productRepository,
         FarmlandService $farmlandService,
         TaskRepository $taskRepository,
-    MessageBusInterface $bus
+        MessageBusInterface $bus
     ) {
         $this->buildingRepository = $buildingRepository;
         $this->urlGenerator = $urlGenerator;
@@ -101,6 +102,14 @@ final class SeedHandler implements MessageHandlerInterface
         $this->updateService->update($response, $building->getPlayer(), $client);
         $this->logger->info('Updated');
 
-        $this->bus->dispatch(new Crop($building), [new DelayStamp(random_int(16, 23) * 60 * 1000)]); // delay 16-23 minutes
+        $this->bus->dispatch(new Crop($building), [new DelayStamp($this->getDelay($product))]); // delay 16-23 minutes
+    }
+
+    private function getDelay(Product $product): int
+    {
+        $minCropTriggeredTime = $product->getGrowingTime();
+        $maxCropTriggeredTime = $minCropTriggeredTime + random_int(34, 200);
+
+        return random_int($minCropTriggeredTime, $maxCropTriggeredTime) * 1000;
     }
 }

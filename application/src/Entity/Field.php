@@ -53,6 +53,11 @@ class Field
      */
     private $product;
 
+    /**
+     * @ORM\Column(type="string", length=5, nullable=true)
+     */
+    private $productType;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -138,6 +143,18 @@ class Field
     public function setProduct(?Product $product): self
     {
         $this->product = $product;
+
+        return $this;
+    }
+
+    public function getProductType(): ?string
+    {
+        return $this->productType;
+    }
+
+    public function setProductType(?string $productType): self
+    {
+        $this->productType = $productType;
 
         return $this;
     }

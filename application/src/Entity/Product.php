@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Service\ProductDurationService;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -78,5 +79,10 @@ class Product
         $this->id = $id;
 
         return $this;
+    }
+
+    public function getGrowingTime()
+    {
+        return ProductDurationService::getProductDurationByPid($this->getPid());
     }
 }

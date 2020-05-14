@@ -94,7 +94,7 @@ class UpdateService
 
         if ($product === null) {
             $product = new Product();
-            $product->setPid($level2['pid']);
+            $product->setPid((int)$level2['pid']);
             $product->setPlayer($player);
             $this->entityManager->persist($product);
         }
@@ -160,8 +160,8 @@ class UpdateService
         if ($building === null) {
             $building = new Building();
             $building->setFarm($farm)
-                ->setPosition($spaceData['position'])
-                ->setType($spaceData['buildingid'])
+                ->setPosition((int)$spaceData['position'])
+                ->setType((int)$spaceData['buildingid'])
                 ->setPlayer($player);
             $this->entityManager->persist($building);
         }

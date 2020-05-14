@@ -99,7 +99,7 @@ final class CropHandler implements MessageHandlerInterface
         $task = $this->taskRepository->findOneBy(['building' => $building, 'status' => 1]);
 
         if ($task) {
-            $this->bus->dispatch(new Seed($building, $task->getProduct())); // delay 16-23 minutes
+            $this->bus->dispatch(new Seed($building, $task->getProduct()));
         }
     }
 }
