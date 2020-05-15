@@ -88,6 +88,11 @@ final class CropHandler implements MessageHandlerInterface
 
         if($responseData === null){
             $this->logger->error('JSON invalid' . $response);
+            if(strpos($response, 'Błąd bazy danych' !== false)){
+                $this->bus->dispatch($message, [new DelayStamp(60 * 60 * 1000)]);
+                $this->logger->info('Message Delayed 1h');
+            }
+
             throw new JsonNotValid($response);
         }
 
