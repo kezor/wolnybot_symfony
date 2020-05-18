@@ -105,7 +105,7 @@ final class UpdateHandler implements MessageHandlerInterface
 
         $responseData = json_decode($response, true);
 
-        if($responseData === null){
+        if($responseData == null){
             $this->logger->debug('INVALID JSON: '. $response);
 
         }
