@@ -103,8 +103,12 @@ final class UpdateHandler implements MessageHandlerInterface
             $response = $this->client->getDashboardData();
         }
 
-        $response = json_decode($response, true);
+        $responseData = json_decode($response, true);
 
-        $this->updateService->update($response, $player, $this->client);
+        if($responseData === null){
+            $this->logger->debug('INVALID JSON: '. $response);
+
+        }
+        $this->updateService->update($responseData, $player, $this->client);
     }
 }
